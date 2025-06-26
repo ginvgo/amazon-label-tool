@@ -1,15 +1,9 @@
 {
   "name": "amazon-label-tool",
-  "version": "1.0.0",
-  "description": "Amazon Label Processing Tool on Cloudflare",
+  "version": "2.0.0",
+  "description": "Professional Amazon Label Processing Tool",
   "private": true,
-  "scripts": {
-    "deploy": "wrangler pages deploy public"
-  },
   "dependencies": {
     "pdf-lib": "^1.17.1"
-  },
-  "devDependencies": {
-    "wrangler": "^3.0.0"
   }
 }
