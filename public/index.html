@@ -1,78 +1,226 @@
-<!-- amazon-label-tool/public/index.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>专业亚马逊标签工具 (Cloudflare版)</title>
+    <title>专业亚马逊标签工具 v2.0</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        :root{--bg-color:#f7f7f8;--main-content-bg:#ffffff;--text-color:#1a1a1a;--text-secondary-color:#6b6b6b;--border-color:#e0e0e0;--accent-color:#5E5CEE;--accent-color-hover:#4d4ac8;--danger-color:#E5484D;--success-color:#34C759;}
+        :root{--bg-color:#f7f7f8;--main-content-bg:#ffffff;--text-color:#1a1a1a;--text-secondary-color:#6b6b6b;--border-color:#e0e0e0;--accent-color:#5E5CEE;--accent-color-hover:#4d4ac8;--danger-color:#E5484D;--success-color:#34C759}
         *{box-sizing:border-box;margin:0;padding:0}
         html,body{height:100%}
-        body{font-family:'Inter',sans-serif;background-color:var(--bg-color);color:var(--text-color);display:flex;justify-content:center;align-items:center;padding:2rem;font-size:16px;}
-        .app-container{width:100%;max-width:500px;background:var(--main-content-bg);border-radius:12px;border:1px solid var(--border-color);box-shadow:0 8px 32px rgba(0,0,0,0.05);padding:2.5rem;display:flex;flex-direction:column;gap:1.8rem;}
-        header{text-align:center;}
-        h1{font-size:1.8rem;font-weight:700;letter-spacing:-.04em;}
-        header p{font-size:1rem;color:var(--text-secondary-color);margin-top:0.5rem;}
-        #upload-form > div {margin-bottom: 1.5rem;}
-        .form-group label{font-weight:500;margin-bottom:0.5rem;display:block;}
-        input[type="text"],input[type="number"]{width:100%;padding:10px 14px;border:1px solid var(--border-color);border-radius:8px;font-size:1rem;transition: all .2s;}
+        body{font-family:'Inter',sans-serif;background-color:var(--bg-color);color:var(--text-color);display:flex;flex-direction:column;font-size:14px;line-height:1.6}
+        .container{max-width:1400px;margin:0 auto;padding:32px;display:flex;flex-direction:column;flex-grow:1;width:100%}
+        header{text-align:center;margin-bottom:32px}
+        h1{font-size:2.2rem;font-weight:700;letter-spacing:-1.2px}
+        header p{font-size:1rem;color:var(--text-secondary-color);margin-top:8px}
+        #upload-container{border:2px dashed var(--border-color);border-radius:12px;padding:60px;text-align:center;cursor:pointer;transition:all .2s;background-color:var(--main-content-bg)}
+        #upload-container.dragover{border-color:var(--accent-color);background-color:#f5f4ff}
+        #upload-container p{font-size:1.1rem;font-weight:500;color:var(--text-secondary-color)}
+        #upload-container span{color:var(--accent-color);font-weight:600}
+        #file-input{display:none}
+        #editor-container{display:none;flex-direction:row;gap:24px;flex-grow:1;min-height:0}
+        #preview-wrapper{flex-grow:1;background-color:var(--bg-color);border-radius:8px;overflow:auto;padding:24px;border:1px solid var(--border-color);min-height:0;position:relative}
+        #pdf-preview{display:flex;flex-direction:column;align-items:center;gap:20px}
+        #pdf-preview canvas{max-width:100%;height:auto;box-shadow:0 4px 12px rgba(0,0,0,0.08);border:1px solid #ddd;border-radius:4px}
+        #loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1rem;color:var(--text-secondary-color);background:rgba(255,255,255,0.8);padding:10px 20px;border-radius:8px;display:none;z-index:10}
+        #controls{width:320px;flex-shrink:0;background-color:var(--main-content-bg);border:1px solid var(--border-color);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:20px}
+        .control-group h3{font-size:1rem;font-weight:600;border-bottom:1px solid var(--border-color);padding-bottom:8px;margin-bottom:4px;}
+        .form-row{display:flex;flex-direction:column;gap:6px;}
+        label{font-weight:500}
+        input[type="text"],input[type="number"]{width:100%;padding:8px 12px;border:1px solid var(--border-color);border-radius:6px;font-size:14px;transition:all .2s}
         input[type="text"]:focus,input[type="number"]:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px rgba(94,92,238,0.1);outline:none;}
-        .file-input-wrapper{border:2px dashed var(--border-color);border-radius:8px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;}
-        .file-input-wrapper.dragover{border-color:var(--accent-color);background-color:#f5f4ff;}
-        .file-input-wrapper p{color:var(--text-secondary-color);}
-        .file-input-wrapper span{color:var(--accent-color);font-weight:500;}
-        #file-name{font-size:0.9rem;color:var(--success-color);margin-top:0.5rem;text-align:center;font-weight:500;}
-        .checkbox-row{display:flex;align-items:center;gap:0.75rem;padding:0.5rem;border-radius:6px;}
-        .checkbox-row input[type="checkbox"]{width:1.2rem;height:1.2rem;accent-color:var(--accent-color);}
-        .btn{width:100%;padding:14px;font-size:1rem;font-weight:600;border-radius:8px;border:none;background-color:var(--accent-color);color:white;cursor:pointer;transition:background-color .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-        .btn:hover:not(:disabled){background-color:var(--accent-color-hover);}
-        .btn:disabled{background-color:#ccc;cursor:not-allowed;}
-        .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite;display:none;}
-        @keyframes spin{to{transform:rotate(360deg);}}
-        #status-message{text-align:center;font-weight:500;min-height:24px;}
-        .status-success{color:var(--success-color);}
-        .status-error{color:var(--danger-color);}
+        .checkbox-row{display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;cursor:pointer;transition:background-color .2s}
+        .checkbox-row:hover{background-color:var(--bg-color)}
+        .checkbox-row input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent-color)}
+        .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;font-size:1rem;font-weight:500;border-radius:6px;border:1px solid var(--border-color);cursor:pointer;transition:all .2s}
+        .btn:disabled{background-color:#f0f0f0;color:#aaa;cursor:not-allowed;border-color:var(--border-color)}
+        .btn-primary{background-color:var(--accent-color);color:white;border-color:var(--accent-color);font-weight:600}
+        .btn-primary:hover:not(:disabled){background-color:var(--accent-color-hover);border-color:var(--accent-color-hover)}
+        .btn-secondary{background-color:#e9e9e9;border-color:#dcdcdc}
+        .btn-secondary:hover:not(:disabled){background-color:#dcdcdc}
+        #status-message{font-size:0.9rem;text-align:center;color:var(--text-secondary-color);min-height:40px;padding:5px;}
+        .status-error{color:var(--danger-color);font-weight:500;}
+        @media (max-width:992px){#editor-container{flex-direction:column}#controls{width:100%;order:-1;margin-bottom:16px}#preview-wrapper{height:60vh}}
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <header><h1>专业标签工具</h1><p>高精度移除文字 & 添加产地信息</p></header>
-        <form id="upload-form">
-            <div class="form-group"><label for="file-input">1. 上传PDF文件</label><div class="file-input-wrapper" id="file-dropzone"><p>拖拽文件至此, 或<span>点击选择</span></p></div><input type="file" id="file-input" accept="application/pdf" hidden><div id="file-name"></div></div>
-            <div class="form-group"><label for="text-to-remove">2. 移除文字 (可选)</label><input type="text" id="text-to-remove" placeholder="输入公司名、地址等"></div>
-            <div class="form-group"><label>3. 添加产地 (可选)</label><div class="checkbox-row"><input type="checkbox" id="add-text-checkbox"><label for="add-text-checkbox">在每个标签底部添加 "Made in China"</label></div><div id="add-text-options" style="display: none; margin-top: 1rem;"><label for="font-size">字体大小 (pt)</label><input type="number" id="font-size" value="8" min="1" style="max-width: 100px;"></div></div>
-            <button type="submit" class="btn" id="submit-btn"><span class="spinner" id="spinner"></span><span>处理并下载</span></button>
-            <div id="status-message" style="margin-top: 1rem;"></div>
-        </form>
+    <div class="container">
+        <header><h1>专业标签工具 v2.0</h1><p>客户端实时预览，云端高精度处理</p></header>
+        <main id="main-content">
+            <div id="upload-container"><input type="file" id="file-input" accept="application/pdf"><p>将PDF文件拖拽到此处，或<span>点击选择</span></p></div>
+            <div id="editor-container">
+                <div id="preview-wrapper"><div id="loader"></div><div id="pdf-preview"></div></div>
+                <aside id="controls">
+                    <div class="control-group"><h3>1. 移除文字 (可选)</h3><div class="form-row"><label for="text-to-remove">输入需删除的文字</label><input type="text" id="text-to-remove" placeholder="例如：公司名、地址等"></div></div>
+                    <div class="control-group"><h3>2. 添加 "Made in China" (可选)</h3><label class="checkbox-row"><input type="checkbox" id="add-text-checkbox"><label for="add-text-checkbox">在每个标签底部添加</label></label><div id="add-text-options" style="display: none; flex-direction: column; gap: 12px; margin-top:10px;"><div class="form-row"><label for="font-size">字体大小 (pt)</label><input type="number" id="font-size" value="8" min="1"></div></div></div>
+                    <div class="control-group"><h3>3. 生成</h3><div id="status-message"></div><button class="btn btn-secondary" id="btn-preview" disabled>预览效果</button><button class="btn btn-primary" id="btn-download" disabled>处理并下载 PDF</button></div>
+                </aside>
+            </div>
+        </main>
     </div>
+    <script src="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.min.js"></script>
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`;
         const API_URL = "/api/process";
-        const form = document.getElementById('upload-form'), fileInput = document.getElementById('file-input'), fileDropzone = document.getElementById('file-dropzone'), fileNameDisplay = document.getElementById('file-name'), textToRemoveInput = document.getElementById('text-to-remove'), addTextCheckbox = document.getElementById('add-text-checkbox'), addTextOptions = document.getElementById('add-text-options'), fontSizeInput = document.getElementById('font-size'), submitBtn = document.getElementById('submit-btn'), spinner = document.getElementById('spinner'), statusMessage = document.getElementById('status-message');
-        let selectedFile = null;
-        fileDropzone.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', () => handleFileSelect(fileInput.files));
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { fileDropzone.addEventListener(eventName, preventDefaults, false); fileDropzone.addEventListener(eventName, () => fileDropzone.classList.toggle('dragover', ['dragenter', 'dragover'].includes(eventName))); });
-        fileDropzone.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files), false);
+
+        const ui = {
+            uploadContainer: document.getElementById('upload-container'), fileInput: document.getElementById('file-input'), editorContainer: document.getElementById('editor-container'),
+            previewDiv: document.getElementById('pdf-preview'), loader: document.getElementById('loader'), textToRemove: document.getElementById('text-to-remove'),
+            addTextCheckbox: document.getElementById('add-text-checkbox'), addTextOptions: document.getElementById('add-text-options'), fontSizeInput: document.getElementById('font-size'),
+            statusMessage: document.getElementById('status-message'), btnPreview: document.getElementById('btn-preview'), btnDownload: document.getElementById('btn-download'),
+        };
+
+        let state = { originalFile: null, pdfDoc: null, modifications: null };
+
+        function init() {
+            ui.uploadContainer.addEventListener('click', () => ui.fileInput.click());
+            ui.fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => ui.uploadContainer.addEventListener(eName, preventDefaults));
+            ['dragenter', 'dragover'].forEach(eName => ui.uploadContainer.addEventListener(eName, () => ui.uploadContainer.classList.add('dragover')));
+            ['dragleave', 'drop'].forEach(eName => ui.uploadContainer.addEventListener(eName, () => ui.uploadContainer.classList.remove('dragover')));
+            ui.uploadContainer.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
+            ui.addTextCheckbox.addEventListener('change', () => ui.addTextOptions.style.display = ui.addTextCheckbox.checked ? 'flex' : 'none');
+            ui.btnPreview.addEventListener('click', runPreview);
+            ui.btnDownload.addEventListener('click', runProcessAndDownload);
+        }
+
         function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-        function handleFileSelect(files) { if (files.length > 0) { selectedFile = files[0]; fileNameDisplay.textContent = `已选择: ${selectedFile.name}`; statusMessage.textContent = ''; } }
-        addTextCheckbox.addEventListener('change', () => { addTextOptions.style.display = addTextCheckbox.checked ? 'block' : 'none'; });
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!selectedFile) { showStatus('请先选择一个PDF文件', 'error'); return; }
-            setLoading(true);
+        
+        async function handleFileSelect(file) {
+            if (!file || file.type !== 'application/pdf') return;
+            state.originalFile = file;
+            ui.uploadContainer.style.display = 'none';
+            ui.editorContainer.style.display = 'flex';
+            setLoading(true, "正在加载并渲染PDF...");
+            try {
+                const fileBuffer = await file.arrayBuffer();
+                state.pdfDoc = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+                ui.previewDiv.innerHTML = '';
+                for (let i = 1; i <= state.pdfDoc.numPages; i++) {
+                    const page = await state.pdfDoc.getPage(i);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const canvas = document.createElement('canvas');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    canvas.dataset.pageIndex = i - 1;
+                    ui.previewDiv.appendChild(canvas);
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+                }
+                ui.btnPreview.disabled = false;
+                ui.btnDownload.disabled = false;
+                setStatus('加载完成，请设置选项后预览。');
+            } catch (err) {
+                setStatus(`加载PDF失败: ${err.message}`, true);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        async function analyzePdfForModifications() {
+            setLoading(true, "正在分析PDF内容...");
+            const modifications = { pages: [] };
+            const searchText = ui.textToRemove.value.trim().toLowerCase();
+
+            for (let i = 0; i < state.pdfDoc.numPages; i++) {
+                const page = await state.pdfDoc.getPage(i + 1);
+                const textContent = await page.getTextContent();
+                const viewport = page.getViewport({ scale: 1.0 }); // Use scale 1.0 for original coordinates
+                const { width, height } = viewport;
+                const items = textContent.items.map(item => {
+                    const transform = pdfjsLib.Util.transform(viewport.transform, item.transform);
+                    return { str: item.str, x: transform[4], y: transform[5], width: item.width, height: item.height };
+                });
+
+                const FNSKU_REGEX = /^(X00|B0)[A-Z0-9]{8,10}$/i;
+                const anchors = items.filter(item => FNSKU_REGEX.test(item.str.trim()));
+                const labels = anchors.map(anchor => {
+                    const searchBox = { minX: anchor.x - 120, maxX: anchor.x + 120, minY: anchor.y - 60, maxY: anchor.y + 60 };
+                    const labelItems = items.filter(item => item.x > searchBox.minX && item.x < searchBox.maxX && item.y > searchBox.minY && item.y < searchBox.maxY);
+                    const box = labelItems.reduce((b, item) => ({ minX: Math.min(b.minX, item.x), maxX: Math.max(b.maxX, item.x + item.width), minY: Math.min(b.minY, item.y - item.height), maxY: Math.max(b.maxY, item.y) }), { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+                    return { box, items: labelItems };
+                });
+                
+                const pageMod = { removeAreas: [], addText: [] };
+                labels.forEach(label => {
+                    if (searchText) {
+                        const matchedItems = label.items.filter(item => item.str.toLowerCase().includes(searchText));
+                        if(matchedItems.length > 0) {
+                            const unionBox = matchedItems.reduce((b, item) => ({ minX: Math.min(b.minX, item.x), maxX: Math.max(b.maxX, item.x + item.width), minY: Math.min(b.minY, item.y - item.height), maxY: Math.max(b.maxY, item.y) }), { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity });
+                            pageMod.removeAreas.push({ x: unionBox.minX - 1, y: height - unionBox.maxY - 1, width: unionBox.maxX - unionBox.minX + 2, height: unionBox.maxY - unionBox.minY + 2 });
+                        }
+                    }
+                    if (ui.addTextCheckbox.checked) {
+                        pageMod.addText.push({ text: 'Made in China', fontSize: parseInt(ui.fontSizeInput.value) || 8, x: label.box.minX + (label.box.maxX - label.box.minX) / 2, y: height - label.box.maxY - 2 });
+                    }
+                });
+                modifications.pages.push(pageMod);
+            }
+            setLoading(false);
+            return modifications;
+        }
+
+        async function runPreview() {
+            state.modifications = await analyzePdfForModifications();
+            const canvases = ui.previewDiv.querySelectorAll('canvas');
+            for (let i = 0; i < canvases.length; i++) {
+                const canvas = canvases[i], context = canvas.getContext('2d');
+                const page = await state.pdfDoc.getPage(i + 1);
+                const viewport = page.getViewport({ scale: 2.0 });
+                await page.render({ canvasContext: context, viewport }).promise; // Redraw
+                
+                const { removeAreas, addText } = state.modifications.pages[i];
+                const scale = viewport.scale;
+                
+                removeAreas.forEach(area => {
+                    context.fillStyle = 'rgba(255, 0, 0, 0.4)';
+                    context.fillRect(area.x * scale, area.y * scale, area.width * scale, area.height * scale);
+                });
+                addText.forEach(textInfo => {
+                    context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    context.font = `bold ${textInfo.fontSize * scale}px sans-serif`;
+                    context.textAlign = 'center'; context.textBaseline = 'bottom';
+                    context.fillText(textInfo.text, textInfo.x * scale, textInfo.y * scale);
+                });
+            }
+            setStatus('预览已更新。');
+        }
+
+        async function runProcessAndDownload() {
+            if (!state.modifications) {
+                setStatus('请先点击“预览效果”生成操作指令。', true);
+                return;
+            }
+            setLoading(true, '正在云端处理并生成PDF...');
             const formData = new FormData();
-            formData.append('file', selectedFile); formData.append('textToRemove', textToRemoveInput.value); formData.append('addMadeInChina', addTextCheckbox.checked); formData.append('fontSize', fontSizeInput.value);
+            formData.append('file', state.originalFile);
+            formData.append('modifications', JSON.stringify(state.modifications));
+
             try {
                 const response = await fetch(API_URL, { method: 'POST', body: formData });
-                if (!response.ok) { const errorData = await response.json().catch(() => ({error: `服务器错误: ${response.statusText}`})); throw new Error(errorData.error); }
-                const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `processed-${selectedFile.name}`; document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
-                showStatus('处理成功，已开始下载！', 'success');
-            } catch (error) { console.error('Error:', error); showStatus(`处理失败: ${error.message}`, 'error'); } finally { setLoading(false); }
-        });
-        function setLoading(isLoading) { submitBtn.disabled = isLoading; spinner.style.display = isLoading ? 'block' : 'none'; statusMessage.textContent = isLoading ? '正在处理中，请稍候...' : ''; statusMessage.className = ''; }
-        function showStatus(message, type) { statusMessage.textContent = message; statusMessage.className = type === 'success' ? 'status-success' : 'status-error'; }
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: `服务器错误: ${response.statusText}` }));
+                    throw new Error(errorData.error);
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = `processed-${state.originalFile.name}`;
+                document.body.appendChild(a); a.click(); a.remove();
+                window.URL.revokeObjectURL(url);
+                setStatus('处理成功，已开始下载！');
+            } catch (error) {
+                console.error('Error:', error);
+                setStatus(`处理失败: ${error.message}`, true);
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        function setLoading(isLoading, message = '') { ui.loader.textContent = message; ui.loader.style.display = isLoading ? 'block' : 'none'; }
+        function setStatus(message, isError = false) { ui.statusMessage.textContent = message; ui.statusMessage.className = isError ? 'status-error' : ''; }
+
+        init();
     </script>
 </body>
 </html>
